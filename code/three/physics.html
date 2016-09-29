@@ -29,7 +29,7 @@
 		var clock, scene, camera, renderer, controls;
 		var balls = [];
 		var balldata = [];
-		var dimension = 200;
+		var dimension = 80;
 		var fieldsources = [];
 		var fielddata = [];
 
@@ -68,7 +68,8 @@
 
 		function addBall(bx, by, bz) {
 			var ballGeometry = new THREE.SphereGeometry(1, 5, 5); 
-			var ballMaterial = new THREE.MeshLambertMaterial({color:0xffee00});
+			// var ballMaterial = new THREE.MeshLambertMaterial({color:0xffee00});
+			var ballMaterial = new THREE.MeshLambertMaterial({color:randomColor()});
 			var ball = new THREE.Mesh(ballGeometry, ballMaterial);
 			ball.position.set(bx, by, bz);
 
@@ -154,10 +155,23 @@
 				}
 			}
 
+			// addField(0, 0, 0, function(fx, fy, fz) {
+			// 	norm = Math.pow(Math.sqrt(fx*fx+fy*fy+fz*fz+0.5), 3)*100;
+			// 	return {x:-fx/norm, y:-fy/norm, z:-fz/norm};
+			// });
+
+			// addField(0, 0, 0, function(fx, fy, fz) {
+			// 	norm = Math.pow(Math.sqrt(fx*fx+fy*fy+fz*fz+0.001), 2)*150;
+			// 	return {x:-fy/norm, y:fx/norm, z:fz/norm};
+			// });
+
 			addField(0, 0, 0, function(fx, fy, fz) {
-				norm = Math.pow(Math.sqrt(fx*fx+fy*fy+fz*fz+0.001), 3)*100;
-				return {x:fx/norm, y:fy/norm, z:fz/norm};
+				norm = Math.pow(Math.sqrt(fx*fx+fy*fy+fz*fz+0.001), 2)*750;
+				return {x:fz/norm, y:fx/norm, z:fy/norm};
 			});
+
+		
+
 
 
 

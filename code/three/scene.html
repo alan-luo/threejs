@@ -1,0 +1,151 @@
+<html>
+<head>
+	<title>Hello world</title>
+	<script type="text/javascript" src="./js/three.js"></script>
+	<script type="text/javascript" src="./js/dat.gui.js"></script>
+	<script type="text/javascript" src="./js/stats.js"></script>
+	<script type="text/javascript" src="./js/TrackballControls.js"></script>
+	<style type="text/css">
+	body {
+		margin: 0;
+		padding: 0;
+		overflow:hidden;
+	}
+	div#WebGL-output {
+		position:absolute;
+		width:100%;
+		height:100%;
+	}
+	div#controls {
+		position:absolute;
+		width:100%;
+		min-height:100px;
+		background:white;
+	}
+	</style>
+</head>
+<body>
+	<!--<div id="controls"></div>-->
+	<div id="WebGL-output"></div>
+
+	<script type="text/javascript">
+		var clock, scene, camera, renderer, controls;
+		var plane;
+
+		function init() {
+			// set some stuff up
+			clock = new THREE.Clock();
+			clock.start();
+
+			scene = new THREE.Scene();
+			camera = new THREE.PerspectiveCamera(45, window.innerWidth/window.innerHeight, 1, 1000);
+
+			cameracontrols = new THREE.TrackballControls(camera);
+			cameracontrols.rotateSpeed = 1.0;
+			cameracontrols.zoomSpeed = 1.2;
+			cameracontrols.panSpeed = 0.8;
+			cameracontrols.noZoom = false;
+			cameracontrols.noPan = false;
+			cameracontrols.staticMoving = true;
+			cameracontrols.dynamicDampingFactor = 0.3;
+			cameracontrols.keys = [ 65, 83, 68 ];
+			cameracontrols.addEventListener( 'change', renderScene);
+
+			renderer = new THREE.WebGLRenderer();
+			renderer.setClearColor(new THREE.Color(0xEEEEEE, 1.0));
+			renderer.setSize(window.innerWidth, window.innerHeight);
+			renderer.shadowMapEnabled = true;
+
+			var axes = new THREE.AxisHelper(20);
+			scene.add(axes);
+
+	//start doing actual stuff here//////////
+			//add the star
+			var planeGeometry = new THREE.PlaneGeometry(60, 40, 1, 1);
+			var planeMaterial = new THREE.MeshLambertMaterial({color:0xffffff});
+			plane = new THREE.Mesh(planeGeometry, planeMaterial);
+			plane.receiveShadow = true;
+
+			scene.add(plane);
+
+
+			var spotLight = new THREE.SpotLight(0xffffff);
+			spotLight.position.set(0, 0, 40);
+			scene.add(spotLight);
+			spotLight.castShadow = true; 
+
+			var ambientLight = new THREE.AmbientLight(0x0c0c0c);
+			scene.add(ambientLight);
+
+			//set up lights and camera
+			camera.position.set(0, -40, 50);
+			camera.lookAt(scene.position);
+
+
+
+			scene.fog = new THREE.FogExp2(0xffffff, 0.01);
+
+			//finish
+			document.getElementById("WebGL-output").appendChild(renderer.domElement);
+			renderer.render(scene, camera);
+			renderScene();
+
+		}
+		function renderScene() {
+			scene.traverse(function (e) {
+                if (e instanceof THREE.Mesh && e != plane) {
+                    e.rotation.x += guicontrols.rotationSpeed;
+                    e.rotation.y += guicontrols.rotationSpeed;
+                    e.rotation.z += guicontrols.rotationSpeed;
+                }
+            });
+
+
+			renderer.render(scene, camera);
+		}
+
+		var guicontrols = new function() {
+			this.addCube=function() {
+				var cubeSize = Math.ceil(Math.random()*3);
+				var cubeGeometry = new THREE.BoxGeometry(cubeSize, cubeSize, cubeSize);
+				var cubeMaterial = new THREE.MeshLambertMaterial({color:Math.random() * 0xff0000});
+				var cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
+				cube.castShadow = true;
+				cube.name = "cube-" + scene.children.length;
+				cube.position.set(0, 0, 0);
+				cube.position.x = -30+Math.random()*60;
+				cube.position.z = Math.round(Math.random()*5);
+				cube.position.y = -20+Math.random()*40;
+
+				scene.add(cube);
+				console.log(cube);
+				// this.numberOfObjects = scene.children.length;
+
+			};
+			this.rotationSpeed=0.01;
+		}
+
+		var gui = new dat.GUI();
+		gui.add(guicontrols, 'addCube');
+		gui.add(guicontrols, 'rotationSpeed', 0.01, 0.1);
+
+
+
+
+
+		function animate() {
+			requestAnimationFrame( animate );
+			renderScene();
+			cameracontrols.update();
+
+		}
+
+		init();
+		animate();
+
+		for(var i=0; i<10; i++) guicontrols.addCube();
+
+	</script>
+
+</body>
+</html>
