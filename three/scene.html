@@ -52,7 +52,7 @@
 			cameracontrols.addEventListener( 'change', renderScene);
 
 			renderer = new THREE.WebGLRenderer();
-			renderer.setClearColor(new THREE.Color(0xEEEEEE, 1.0));
+			renderer.setClearColor(new THREE.Color('gray'));
 			renderer.setSize(window.innerWidth, window.innerHeight);
 			renderer.shadowMapEnabled = true;
 
@@ -75,6 +75,7 @@
 			spotLight.castShadow = true; 
 
 			var ambientLight = new THREE.AmbientLight(0x0c0c0c);
+			ambientLight.castShadow = true;
 			scene.add(ambientLight);
 
 			//set up lights and camera
@@ -83,7 +84,7 @@
 
 
 
-			scene.fog = new THREE.FogExp2(0xffffff, 0.01);
+			scene.fog = new THREE.FogExp2(0xffffff, 0.02);
 
 			//finish
 			document.getElementById("WebGL-output").appendChild(renderer.domElement);
@@ -108,7 +109,13 @@
 			this.addCube=function() {
 				var cubeSize = Math.ceil(Math.random()*3);
 				var cubeGeometry = new THREE.BoxGeometry(cubeSize, cubeSize, cubeSize);
-				var cubeMaterial = new THREE.MeshLambertMaterial({color:Math.random() * 0xff0000});
+				// var cubeMaterial = new THREE.MeshLambertMaterial({color:Math.random() * 0xff0000});
+
+				// instantiate a loader
+				var loader = new THREE.TextureLoader();
+				var texture = loader.load('./images/img'+Math.ceil(Math.random()*5)+'.jpg');
+
+				var cubeMaterial = new THREE.MeshPhongMaterial({map: texture });
 				var cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
 				cube.castShadow = true;
 				cube.name = "cube-" + scene.children.length;
