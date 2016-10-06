@@ -25,8 +25,8 @@
 	<div id="WebGL-output"></div>
 
 	<script type="text/javascript">
-		var clock, scene, camera, renderer, controls, stats, geometry, particles;
-		var mouse = {x:0, y:0};
+		var clock, scene, camera, renderer, controls, stats, geometry, particles, raycaster;
+		var mouse = new THREE.Vector2();
 
 		var particles = [];
 
@@ -75,12 +75,14 @@
 
 			particles = new THREE.Points(geometry, material);
 
-			// particles.
 			scene.add(particles);
-			console.log(geometry);
+			// console.log(geometry);
 
-			//render
+			//renderer, raycaster
 			renderer = new THREE.WebGLRenderer();
+			raycaster = new THREE.Raycaster();
+			raycaster.params.Points.threshold = 15; //not sure what this is
+
 
 			//finish
 			document.getElementById("WebGL-output").appendChild(renderer.domElement);
@@ -112,6 +114,12 @@
 			}
 			particles.geometry.verticesNeedUpdate=true;
 			particles.geometry.colorsNeedUpdate=true;
+
+			raycaster.setFromCamera(mouse, camera);
+			var intersections = raycaster.intersectObjects();
+			// intersection = ( intersections.length ) > 0 ? intersections[ 0 ] : null;
+
+			if(time%10<1) console.log(intersections);
 			// h = time * 0.1 % 360;
 			// material.color.setHSL(h, 0.5, 0.5);
 		}
