@@ -1,0 +1,29 @@
+<html>
+<head>
+	<title>Noise test</title>
+	<script type="text/javascript" src="./js/perlin.js"></script>
+</head>
+<body>
+	<canvas id="canvas" width="800" height="600"></canvas>
+
+	<script type="text/javascript">
+		var canvas = document.getElementById("canvas");
+		var ctx = canvas.getContext('2d');
+
+		var noisefn = noise.simplex3;
+
+
+		// var generator = new Simple1DNoise();
+		for(var i=0; i<800; i++) {
+			for(var j=0; j<600; j++) {
+				var y = (noisefn(i/50, j/50, 2)+1)/2;
+				if(i==0)console.log(y);
+				ctx.fillStyle = "rgba(0, 0, 0,"+(y)+")";
+				ctx.fillRect( i, j, 1, 1 );
+				
+			}
+		}
+
+	</script>
+</body>
+</html>

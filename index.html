@@ -1,8 +1,203 @@
 <html>
 <head>
-<title>Test</title>
+	<title>Three.js Gallery</title>
+	<link href="https://fonts.googleapis.com/css?family=Raleway:400,500,700" rel="stylesheet">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+	<link rel="stylesheet" type="text/css" href="./css/style.css">
 </head>
 <body>
-test
+<div class="container">
+	<canvas id="canvas"></canvas>
+	<div class="header">
+		<h1 id="title">THREE.js Gallery</h1>
+	</div>
+
+	<div class="body">
+		<!--<div class="item" id="item0">
+			<img src="./images/img1.jpg" class="clip-circle">
+			<p>a</p>
+		</div>-->
+		<div class="item" id="item0"><p><a href="./hello.html">hello</a></p></div>
+		<div class="item" id="item1"><p><a href="./controls.html">controls</a></p></div>
+		<div class="item" id="item2"><p><a href="./physics.html">physics</a></p></div>
+		<div class="item" id="item3"><p><a href="./scene.html">scene</a></p></div>
+		<div class="item" id="item4"><p><a href="./planets.html">planets</a></p></div>
+		<div class="item" id="item5"><p><a href="./voxel.html">voxel</a></p></div>
+		<div class="item" id="item6"><p><a href="./particles.html">particles</a></p></div>
+		<div class="item" id="item7"><p><a href="./particles2.html">particles+</a></p></div>
+		<div class="item" id="item8"><p><a href="./starfield.html">starfield</a></p></div>
+		<div class="item" id="item9"><p><a href="./particleterrain.html">terrain</a></p></div>
+		<div class="item" id="item10"><p><a href="./particleterrain2.html">terrain+</a></p></div>
+
+	</div>
+</div>
+
+<script type="text/javascript">
+	var radius = 50;
+
+
+	var canvas = document.getElementById("canvas");
+	var ctx = canvas.getContext('2d');
+
+	var vectorFields = [];
+
+	var nodes = [
+	{x:100, y:220}, //hello --------
+	{x:270, y:220}, //controls -----
+	{x:400, y:350}, //physics
+	{x:400, y:220}, //scene
+	{x:530, y:220}, //planets
+	{x:400, y:90}, //voxel
+	{x:900, y:220}, //particles ------
+	{x:770, y:220}, //more particles
+	{x:900, y:350}, //starfield
+	{x:1030, y:220}, //terrain
+	{x:900, y:90} //terrain
+	];
+
+	var links = [
+	{start: 0, end:3, width:500},
+	{start: 3, end:1, size:100},
+	{start: 3, end:2, width:200},
+	{start: 3, end:4, width:200},
+	{start: 3, end:5, width:200},
+	{start: 3, end:6, width:500},
+	{start: 6, end:7, width:200},
+	{start: 6, end:8, width:200},
+	{start: 6, end:9, width:200},
+	{start: 6, end:10, width:200}
+	]
+
+	for(var i=0; i<nodes.length; i++) {
+		nodes[i].vy = Math.random();
+		nodes[i].vx = Math.random();
+		// nodes[i].vy = 0;
+		// nodes[i].vx = 0;
+		nodes[i].ax = 0;
+		nodes[i].ay = 0;
+	}
+
+
+	window.addEventListener('resize', onResize, false);
+	function onResize() {
+		canvas.width=window.innerWidth;
+		canvas.height=window.innerHeight;
+		// $("#canvas").attr('width',800);
+		// $("#canvas").attr('width',600);
+	}
+	window.addEventListener('mousedown', onMouseDown, false);
+	function onMouseDown(event) {
+		var origin = {x: event.clientX, y:event.clientY};
+		vectorFields.push(function(point) {
+			var delx = point.x-origin.x;
+			var dely = point.y-origin.y;
+			var scale = 0.1/(delx*delx+dely*dely);
+			// var scale = 0.01/Math.sqrt((sq(delx)+sq(dely)));
+			return {x:delx*scale,y:dely*scale}; //basic physics, inverse square law
+		});
+	}
+	window.addEventListener('mouseup', onMouseUp, false);
+	function onMouseUp() {
+		vectorFields=[];
+
+	}
+	function init() {
+
+		onResize();
+		//start the animation
+		window.requestAnimationFrame(loop);
+	}
+	function getForce(point) {
+		var sumx =0;
+		var sumy =0;
+		for(var i=0; i<vectorFields.length; i++) {
+			var force = vectorFields[i](point);
+			sumx+=force.x;
+			sumy+=force.y;
+		}
+
+		return {x:sumx, y:sumy};
+	}
+	function loop() {
+		ctx.strokeStyle="white";
+		ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+		ctx.lineWidth=2;
+		//do acceleration and velocity
+		for(var i=0; i<nodes.length; i++) {
+			nodes[i].vx+=nodes[i].ax;
+			nodes[i].vy+=nodes[i].ay;
+			nodes[i].x+=nodes[i].vx;
+			nodes[i].y+=nodes[i].vy;
+			var force = getForce({x:nodes[i].x+radius,y:nodes[i].y+radius});
+			nodes[i].ax+=force.x
+			nodes[i].ay+=force.y;
+			//apply fluid damping
+			nodes[i].vy*=0.9;
+			nodes[i].vx*=0.9;
+			nodes[i].ax*=0.99;
+			nodes[i].ay*=0.99;
+		}
+		//apply linkages
+		for(var i=0; i<links.length; i++) {
+			var startnode = nodes[links[i].start];
+			var endnode = nodes[links[i].end];
+			ctx.beginPath();
+			ctx.moveTo(startnode.x+radius,startnode.y+radius);
+			ctx.lineTo(endnode.x+radius,endnode.y+radius);
+			ctx.stroke();
+			// apply hooke's law -- this section could take some cleaning up
+			delx = endnode.x-startnode.x;
+			dely = endnode.y-startnode.y;
+			var distance = Math.sqrt(delx*delx + dely*dely);
+			var displacement = distance - links[i].size; // if positive, acc inwards (dist > length)
+			var inwards = false;
+			if(displacement>0) inwards = true;
+
+			var force = 0.01 * displacement; //force proportional to displacement
+			// force is positive when going inwards
+			// vector of magnitude force, direction of distance
+			var fx = Math.abs(force*delx/distance);
+			var fy = Math.abs(force*dely/distance);
+			console.log(displacement, inwards);
+			// console.log(Math.sqrt(fx*fx + fy*fy)); //fx and fy should be good
+			// if(inwards) {
+			// 	if(startnode.x<endnode.x) {
+			// 		nodes[links[i].start].ax+=fx;
+			// 		nodes[links[i].end].ax-=fx;
+			// 	} else {
+			// 		nodes[links[i].start].ax-=fx;
+			// 		nodes[links[i].end].ax+=fx;
+			// 	}
+			// } else {
+			// 	// if(startnode.x<endnode.x) {
+			// 	// 	nodes[links[i].start].ax-=fx;
+			// 	// 	nodes[links[i].end].ax+=fx;
+			// 	// }
+			// }
+
+
+
+			// console.log(startvec, endvec);
+			// nodes[links[i].start].ax+=startvec.x;	
+			// nodes[links[i].start].ay+=startvec.y;	
+			// nodes[links[i].end].ax+=endvec.x;
+			// nodes[links[i].end].ay+=endvec.y;
+			
+		}
+
+
+		//set positions
+		for(var i=0; i<nodes.length; i++) {
+			$('#item'+i).css('top',nodes[i].y).css('left',nodes[i].x);
+		}
+
+
+		window.setTimeout(window.requestAnimationFrame(loop), 1000 / 60);
+	}
+
+
+init();
+</script>
 </body>
 </html>

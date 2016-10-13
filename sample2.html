@@ -1,0 +1,84 @@
+<html>
+<head>
+	<title>Hello world</title>
+	<script type="text/javascript" src="./js/three.js"></script>
+	<script type="text/javascript" src="./js/dat.gui.js"></script>
+	<script type="text/javascript" src="./js/stats.js"></script>
+	<script type="text/javascript" src="./js/TrackballControls.js"></script>
+	<style type="text/css">
+	body {
+		margin: 0;
+		padding: 0;
+		overflow:hidden;
+	}
+	div#WebGL-output {
+		position:absolute;
+		width:100%;
+		height:100%;
+	}
+	div#controls {
+		position:absolute;
+		width:100%;
+		min-height:100px;
+		background:white;
+	}
+	</style>
+</head>
+<body>
+	<!--<div id="controls"></div>-->
+	<div id="Stats-output"></div>
+	<div id="WebGL-output"></div>
+
+	<script type="text/javascript">
+		var clock, scene, camera, renderer, controls, stats;
+
+		function init() {
+			// set some stuff up
+			clock = new THREE.Clock();
+			clock.start();
+
+			stats = initStats();
+
+			scene = new THREE.Scene();
+			camera = new THREE.PerspectiveCamera(45, window.innerWidth/window.innerHeight, 1, 1000);
+
+			renderer = new THREE.WebGLRenderer();
+
+			//finish
+			document.getElementById("WebGL-output").appendChild(renderer.domElement);
+			renderScene();
+		}
+
+		function renderScene() {
+			stats.update();
+			requestAnimationFrame(renderScene);
+			renderer.render(scene, camera);
+		}
+
+
+		window.addEventListener('resize', onResize, false);
+		function onResize() {
+			camera.aspect = window.innerWidth / window.innerHeight;
+			camera.updateProjectionMatrix();
+			renderer.setSize(window.innerWidth, window.innerHeight);
+		}
+
+		function initStats() {
+			var statcontroller = new Stats();
+			statcontroller.setMode(0);
+
+			statcontroller.domElement.style.position="absolute";
+			statcontroller.domElement.style.left="0";
+			statcontroller.domElement.style.top="0";
+
+			document.getElementById("Stats-output").appendChild(statcontroller.domElement);
+
+			return statcontroller;
+		}
+		
+		render();
+
+	</script>
+
+</body>
+</html>
